@@ -1,6 +1,7 @@
 package model
 
 import (
+	"log"
 	"database/sql"
 	"fmt"
 	"encoding/base64"
@@ -26,7 +27,7 @@ func Login(email, password string)(*User, error) {
 	hasher.Write([]byte(password))
 	fmt.Println("hasher sum: ", hasher.Sum(nil))
 	pwd := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-	fmt.Println("base64.URLEncoding.EncodeToString: ", pwd)
+	fmt.Println("base64.URLEncoding.EncodeToString:", pwd)
 	row := db.QueryRow(`select id, email,firstname, lastname from public.user 
 		where email = $1 and password = $2`, email, pwd)
 	err := row.Scan(&result.ID, &result.Email,&result.FirstName, &result.LastName)
@@ -37,6 +38,15 @@ func Login(email, password string)(*User, error) {
 		return nil, err
 		
 	}
+	t := time.Now()
+	_, err = db.Exec(`
+		update public.user set lastlogin = $1
+		where id = $2`,t, result.ID)
+	
+	if err != nil {
+		log.Printf("Failed to update the login time for user %v to %v:%v", result.Email, t, err)
+	}
+	
 	return result, nil
 }
 

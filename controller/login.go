@@ -29,12 +29,12 @@ func (l login) handleLogin(w http.ResponseWriter, r *http.Request) {
 		f := r.Form
 		email := f.Get("email")
 		pass := f.Get("password")
-		if user, err := model.Login(email, pass); err !=nil {
+		if user, err := model.Login(email, pass); err ==nil {
 			log.Printf("User has logged in: %v\n",user)
 			http.Redirect(w,r,"/home", http.StatusTemporaryRedirect)
 	    	return
 		} else {
-			log.Printf("Failed to log user in with email: %v\n", email)
+			log.Printf("Failed to log user in with email: %v, error was:%v\n", email,err)
 			vm.Email = email
 			vm.Password = pass 
 		}

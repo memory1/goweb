@@ -12,6 +12,8 @@ import (
 	"04-looping/middleware"
 	"04-looping/model"
 	_ "github.com/lib/pq"
+
+	_ "net/http/pprof"
 )
 
 const (
@@ -27,7 +29,8 @@ func main() {
 	db := connectToDatabase()
 	defer db.Close()
 	controller.Startup(templates)
-	http.ListenAndServe(":8000", &middleware.TimeoutMiddleware{new(middleware.GzipMiddleware)})
+	go http.ListenAndServe(":8080", nil)
+	http.ListenAndServeTLS(":8000","cert.pem","key.pem", &middleware.TimeoutMiddleware{new(middleware.GzipMiddleware)})
 }
 
 func connectToDatabase() *sql.DB {
